@@ -34,6 +34,7 @@ enum cache_status {
 struct cache_line {
     uint32_t tag;
     enum cache_status status;
+    uint32_t last_used;
 };
 
 // This struct contains the data related to a cache system.
@@ -48,6 +49,7 @@ struct cache_system {
 
     // Masks and shifts
     uint32_t offset_mask, set_index_mask;
+    uint32_t time;
 };
 
 // Create a new cache system.
@@ -61,5 +63,6 @@ int cache_system_mem_access(struct cache_system *cache_system, uint32_t address,
 // tag. If no such element exists, then return NULL.
 struct cache_line *cache_system_find_cache_line(struct cache_system *cache_system, uint32_t set_idx,
                                                 uint32_t tag);
+
 
 #endif

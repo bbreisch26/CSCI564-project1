@@ -13,11 +13,11 @@ struct cache_system *cache_system_new(uint32_t line_size, uint32_t sets, uint32_
     cs->associativity = associativity;
     struct cache_system_stats stats = {0, 0, 0, 0};
     cs->stats = stats;
-
-    // TODO: calculate the index bits, offset bits and tag bits.
-    cs->index_bits = 0;
-    cs->offset_bits = 0;
-    cs->tag_bits = 0;
+    cs->time = 0;
+    // Calculate the index bits, offset bits and tag bits.
+    cs->index_bits = ceil(log2(sets));
+    cs->offset_bits = ceil(log2(line_size));
+    cs->tag_bits = 32 - (cs->index_bits) - (cs->offset_bits);
 
     cs->offset_mask = 0xffffffff >> (32 - cs->offset_bits);
     cs->set_index_mask = 0xffffffff >> cs->tag_bits;
@@ -117,9 +117,21 @@ int cache_system_mem_access(struct cache_system *cache_system, uint32_t address,
 }
 
 struct cache_line *cache_system_find_cache_line(struct cache_system *cache_system, uint32_t set_idx,
-                                                uint32_t tag)
-{
-    // TODO Return a pointer to the cache line within the given set that has
+                                                uint32_t tag) {
+    // Return a pointer to the cache line within the given set that has
     // the given tag. If no such element exists, then return NULL.
-    return NULL;
+    struct cache_line *found = NULL;
+    int i = 0;
+    while(found == NULL) {
+        if(i == cache_system->associativity) {
+            break;
+        }
+        struct cache_line *cl = &cache_system->cache_lines[set_idx * (cache_system->associativity) + i];
+        if(tag == cl->tag) {
+            found = cl;
+            return found;
+        }
+        i+=1;
+    }
+    return found;
 }
